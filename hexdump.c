@@ -1,7 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <string.h>
 #include <ctype.h>
+
+#define VERSION_MAJOR 1
+#define VERSION_MINOR 0
 
 void help(char *f)
 {
@@ -9,6 +13,15 @@ void help(char *f)
     printf("usage: %s <inputfilename> [options]\n", f);
     puts("options:");
     puts("\t-h display this text");
+    puts("\t-v display version");
+    puts("\t-1 skip the first column (offset)");
+    puts("\t-3 skip the third column (ASCII)");
+    exit(0);
+}
+
+void version(char *f)
+{
+    printf("%s version %d.%d\n", f, VERSION_MAJOR, VERSION_MINOR);
     exit(0);
 }
 
@@ -22,18 +35,20 @@ int GetFileSize(FILE *f)
 }
 
 int main(int argc, char **argv) {
-    int i = 0, numread, k = 0, counter = 0, fsize = 0;
+    int i = 0, numread, k = 0, counter = 0, fsize = 0, opt = 0;
+    int skip_first_column = 0, skip_third_column = 0;
     FILE *fp = NULL;
     unsigned char *buf = NULL;
     char ascii[16] = { 0 };
 
     if(argc < 2) {
 	help(argv[0]);
-        exit(1);
     }
 
     if(strcmp(argv[1], "-h") == 0)
         help(argv[0]);
+    if(strcmp(argv[1], "-v") == 0)
+	version(argv[0]);
 
     fp = fopen(argv[1], "rb");
     if(!fp) {
@@ -52,8 +67,30 @@ int main(int argc, char **argv) {
     printf("[*] Number of bytes read: %d\n", numread);
 #endif
 
+    while((opt = getopt(argc, argv, "hv13")) != -1 )
+    {
+	switch(opt)
+	{
+	    case 'h':
+                help(argv[0]);
+		break;
+	    case 'v':
+		version(argv[0]);
+		break;
+	    case '1':  // Skip the first column (offset)
+		skip_first_column = 1;
+		break;
+	    case '3':  // Skip the third column (ASCII representation)
+                skip_third_column = 1;
+		break;
+	    default:
+	        puts("Invalid option");
+                exit(0);
+	}
+    }
+
     for(i = 0; i < numread; i++) {
-        if(i % 16 == 0)
+        if(i % 16 == 0 && !skip_first_column) // Only print the offset if not skipped
             printf("\n%08X: ", i);
         if(i % 1 == 0) // 1 space between each byte
             printf(" ");
@@ -64,14 +101,16 @@ int main(int argc, char **argv) {
         ascii[k] = buf[i];
 
         if (k == 15) {
-            printf("  ");
-            counter += 16;
-            for (int j = 0; j < 16; j++)
-                if (isprint(ascii[j])!= 0)
-                    printf("%c", ascii[j]);
-                else
-                    printf(".");
-            k = 0;
+            if(!skip_third_column) {  // Only print the ASCII representation if not skipped
+                printf("  ");
+                counter += 16;
+                for (int j = 0; j < 16; j++)
+                    if (isprint(ascii[j])!= 0)
+                        printf("%c", ascii[j]);
+                    else
+                        printf(".");
+	    }
+                k = 0;
         }
         else
             k++;
@@ -90,16 +129,20 @@ int main(int argc, char **argv) {
         }
 
         remaining = numread - counter;
-        printf("  ");
-        for(k = 0; k < remaining; k++)
-        {
-            if(isprint(ascii[k]))
-                printf("%c", ascii[k]);
-            else
-                printf(".");
-        }
+
+	if (!skip_third_column) {  // Only print the ASCII representation if not skipped
+            printf("  ");
+            for(k = 0; k < remaining; k++)
+            {
+                if(isprint(ascii[k]))
+                    printf("%c", ascii[k]);
+                else
+                    printf(".");
+            }
+	}
     }
 
     printf("\n");
+    free(buf);
     return 0;
 }
