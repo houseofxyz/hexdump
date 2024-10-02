@@ -91,8 +91,15 @@ int main(int argc, char **argv) {
 
     for(i = 0; i < numread; i++)
     {
-        if(i % 16 == 0 && !skip_first_column) // Only print the offset if not skipped
-            printf("\n%08X: ", i);
+        //if(i % 16 == 0 && !skip_first_column) // Only print the offset if not skipped
+	if (i % 16 == 0)
+	{
+            if (!skip_first_column)  // Print the offset if not skipped
+                printf("\n%08X: ", i);
+	    else
+                printf("\n         ");  // Print spaces to maintain alignment
+	}
+
         if(i % 1 == 0) // 1 space between each byte
             printf(" ");
         if(i % 8 == 0) // add extra space every 8 bytes
