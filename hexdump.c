@@ -2,10 +2,19 @@
 #include <stdlib.h>
 #include <ctype.h>
 
+int GetFileSize(FILE *f)
+{
+    fseek(f, 0, SEEK_END);
+    int size = ftell(f);
+    fseek(f, 0, SEEK_SET);
+
+    return size;
+}
+
 int main(int argc, char **argv) {
-    int i = 0, numread, k = 0, counter = 0;
+    int i = 0, numread, k = 0, counter = 0, fsize = 0;
     FILE *fp = NULL;
-    unsigned char buf[32768];
+    unsigned char *buf = NULL;
     char ascii[16] = { 0 };
 
     if(argc != 2) {
@@ -20,7 +29,12 @@ int main(int argc, char **argv) {
         exit(1);
     }
 
-    numread = fread(&buf, 1, sizeof(buf), fp);
+    fsize = GetFileSize(fp);
+    printf("[*] File size is: %d\n", fsize);
+    buf = (unsigned char *)malloc(fsize);
+
+    numread = fread(buf, 1, fsize, fp);
+    printf("[*] Number of bytes read: %d\n", numread);
 
     for(i = 0; i < numread; i++) {
         if(i % 16 == 0)
