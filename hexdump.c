@@ -1,6 +1,16 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <ctype.h>
+
+void help(char *f)
+{
+    puts("hexdump - output a file's raw data");
+    printf("usage: %s <inputfilename> [options]\n", f);
+    puts("options:");
+    puts("\t-h display this text");
+    exit(0);
+}
 
 int GetFileSize(FILE *f)
 {
@@ -17,11 +27,13 @@ int main(int argc, char **argv) {
     unsigned char *buf = NULL;
     char ascii[16] = { 0 };
 
-    if(argc != 2) {
-        printf("[-] Wrong number of command line arguments\n");
-        printf("[-] Usage: %s <inputfilename>\n", argv[0]);
+    if(argc < 2) {
+	help(argv[0]);
         exit(1);
     }
+
+    if(strcmp(argv[1], "-h") == 0)
+        help(argv[0]);
 
     fp = fopen(argv[1], "rb");
     if(!fp) {
@@ -30,11 +42,15 @@ int main(int argc, char **argv) {
     }
 
     fsize = GetFileSize(fp);
+#ifdef DEBUG
     printf("[*] File size is: %d\n", fsize);
+#endif
     buf = (unsigned char *)malloc(fsize);
 
     numread = fread(buf, 1, fsize, fp);
+#ifdef DEBUG
     printf("[*] Number of bytes read: %d\n", numread);
+#endif
 
     for(i = 0; i < numread; i++) {
         if(i % 16 == 0)
