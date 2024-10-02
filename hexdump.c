@@ -41,9 +41,8 @@ int main(int argc, char **argv) {
     unsigned char *buf = NULL;
     char ascii[16] = { 0 };
 
-    if(argc < 2) {
+    if(argc < 2)
 	help(argv[0]);
-    }
 
     if(strcmp(argv[1], "-h") == 0)
         help(argv[0]);
@@ -51,7 +50,8 @@ int main(int argc, char **argv) {
 	version(argv[0]);
 
     fp = fopen(argv[1], "rb");
-    if(!fp) {
+    if(!fp)
+    {
         printf("[-] Cannot open input file %s\n", argv[1]);
         exit(1);
     }
@@ -89,7 +89,8 @@ int main(int argc, char **argv) {
 	}
     }
 
-    for(i = 0; i < numread; i++) {
+    for(i = 0; i < numread; i++)
+    {
         if(i % 16 == 0 && !skip_first_column) // Only print the offset if not skipped
             printf("\n%08X: ", i);
         if(i % 1 == 0) // 1 space between each byte
@@ -100,8 +101,10 @@ int main(int argc, char **argv) {
 
         ascii[k] = buf[i];
 
-        if (k == 15) {
-            if(!skip_third_column) {  // Only print the ASCII representation if not skipped
+        if (k == 15)
+	{
+            if(!skip_third_column) // Only print the ASCII representation if not skipped
+	    {
                 printf("  ");
                 counter += 16;
                 for (int j = 0; j < 16; j++)
@@ -117,7 +120,8 @@ int main(int argc, char **argv) {
     }
 
     // check difference between printed chars and numread and print the remaining
-    if(counter < numread) {
+    if(counter < numread)
+    {
         int remaining = numread - counter;
 
         while(remaining < 16)
@@ -130,7 +134,8 @@ int main(int argc, char **argv) {
 
         remaining = numread - counter;
 
-	if (!skip_third_column) {  // Only print the ASCII representation if not skipped
+	if (!skip_third_column) // Only print the ASCII representation if not skipped
+	{
             printf("  ");
             for(k = 0; k < remaining; k++)
             {
