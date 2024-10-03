@@ -25,7 +25,7 @@ cl /nologo /Ox /MT /W0 /GS- /DNDEBUG /Fe%OUTPUT_DIR%\hexdump.exe hexdump.c /link
 
 :: Compile debug version
 echo Compiling debug version...
-cl /nologo /Ox /MT /W0 /GS- /DDEBUG /Fe%OUTPUT_DIR%\hexdump_d%EXE_SUFFIX% hexdump.c /link /SUBSYSTEM:CONSOLE /MACHINE:x64
+cl /nologo /Ox /MT /W0 /GS- /DDEBUG /Fe%OUTPUT_DIR%\hexdump_d.exe hexdump.c /link /SUBSYSTEM:CONSOLE /MACHINE:x64
 
 echo Build complete.
 goto end
