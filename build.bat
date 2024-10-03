@@ -21,11 +21,11 @@ if "%1" == "clean" goto clean
 
 :: Compile release version
 echo Compiling release version...
-cl /nologo /Ox /MT /W0 /GS- /DNDEBUG /Fe%OUTPUT_DIR%\hexdump.exe hexdump.c /link /SUBSYSTEM:CONSOLE /MACHINE:x64
+cl /nologo /Ox /MT /W0 /DNDEBUG /Fe%OUTPUT_DIR%\hexdump.exe hexdump.c /link /SUBSYSTEM:CONSOLE /MACHINE:x64
 
 :: Compile debug version
 echo Compiling debug version...
-cl /nologo /Ox /MT /W0 /GS- /DDEBUG /Fe%OUTPUT_DIR%\hexdump_d.exe hexdump.c /link /SUBSYSTEM:CONSOLE /MACHINE:x64
+cl /nologo /Ox /MT /W0 /DDEBUG /Fe%OUTPUT_DIR%\hexdump_d.exe hexdump.c /link /SUBSYSTEM:CONSOLE /MACHINE:x64
 
 echo Build complete.
 goto end
