@@ -42,74 +42,135 @@ int GetFileSize(FILE *f)
     return size;
 }
 
-void OutputFormatting(unsigned char *buffer, int bufferSize, int skip_first_column, int skip_third_column)
+#ifndef MIN
+#define MIN(x, y) ((x < y) ? x : y)
+#endif
+
+typedef unsigned char BYTE;
+
+/*
+void Hexline(char* data, int size)
 {
-    int i = 0, k = 0, counter = 0;
-    char ascii[16] = { 0 };
+    int i = 0;
 
-    for(i = 0; i < bufferSize; i++)
+    for (i = 0; i < MIN(8, size); i++)
+        printf("%02x ", (BYTE)data[i]);
+
+    if (size > 8)
     {
-        if (i % 16 == 0)
-        {
-            if (!skip_first_column)  // Print the offset if not skipped
-                printf("\n%08X: ", i);
-            else
-                printf("\n         ");  // Print spaces to maintain alignment
-        }
+        printf(" ");
+        for (i = 8; i < size; i++)
+            printf("%02x ", (BYTE)data[i]);
+    }
 
-        if(i % 1 == 0) // 1 space between each byte
-            printf(" ");
-        if(i % 8 == 0) // add extra space every 8 bytes
-            printf(" ");
-        printf("%02X", buffer[i]); // Print hex
+    if (size < 16)
+    {
+        i = ((16 * 3) + 1) - (size * 3);
+        if (size > 8) i--;
+        printf("%*c", i, ' ');
+    }
 
-        ascii[k] = buffer[i];
-
-        if (k == 15)
-        {
-            if(!skip_third_column) // Only print the ASCII representation if not skipped
-            {
-                printf("  ");
-                counter += 16;
-                for (int j = 0; j < 16; j++)
-                    if (isprint(ascii[j]) != 0)
-                        printf("%c", ascii[j]);
-                    else
-                        printf(".");
-            }
-            k = 0;
-        }
+    for (i = 0; i < size; i++)
+    {
+        if (data[i] > 0x20 && data[i] < 0x7f)
+            printf("%c", data[i]);
         else
-            k++;
+            printf(".");
     }
 
-    // Print the remaining characters if any
-    if(counter < bufferSize)
+    return;
+}
+
+void Hexdump(char* data, int size)
+{
+    int offset = 0;
+    char* dataPtr = data;
+
+    while (size > 16)
     {
-        int remaining = bufferSize - counter;
+        printf("%08x: ", offset);
+        Hexline(dataPtr, 16);
+        printf("\n");
+        dataPtr += 16;
+        offset += 16;
+        size -= 16;
+    }
+    printf("%08x: ", offset);
+    Hexline(dataPtr, size);
+    printf("\n");
 
-        while(remaining < 16)
+    return;
+}
+*/
+
+void Hexline(char* data, int size, int skip_first_column, int skip_third_column)
+{
+    int i = 0;
+
+    // Print the hex representation for the first 8 bytes
+    for (i = 0; i < MIN(8, size); i++)
+        printf("%02x ", (unsigned char)data[i]);
+
+    // Print a space and the next 8 bytes, if more than 8 bytes
+    if (size > 8)
+    {
+        printf(" ");
+        for (i = 8; i < size; i++)
+            printf("%02x ", (unsigned char)data[i]);
+    }
+
+    // Adjust spacing if less than 16 bytes to align ASCII column
+    if (size < 16 && !skip_third_column)
+    {
+        i = ((16 * 3) + 1) - (size * 3);
+        if (size > 8) i--;
+        printf("%*c", i, ' ');
+    }
+
+    // Print the ASCII representation of the data if not skipping the third column
+    if (!skip_third_column)
+    {
+        for (i = 0; i < size; i++)
         {
-            printf(" 00");
-            if(remaining == 7)
-                printf(" ");
-            remaining++;
-        }
-
-        remaining = bufferSize - counter;
-
-        if (!skip_third_column) // Only print the ASCII representation if not skipped
-        {
-            printf("  ");
-            for(k = 0; k < remaining; k++)
-            {
-                if(isprint(ascii[k]))
-                    printf("%c", ascii[k]);
-                else
-                    printf(".");
-            }
+            if (data[i] > 0x20 && data[i] < 0x7f)
+                printf("%c", data[i]);
+            else
+                printf(".");
         }
     }
+
+    return;
+}
+
+void Hexdump(char* data, int size, int skip_first_column, int skip_third_column)
+{
+    int offset = 0;
+    char* dataPtr = data;
+
+    // Loop over data, 16 bytes at a time
+    while (size > 16)
+    {
+        // Print offset column if not skipping the first column
+        if (!skip_first_column)
+            printf("%08x: ", offset);
+
+        // Call Hexline to print the hex and ASCII representation
+        Hexline(dataPtr, 16, skip_first_column, skip_third_column);
+        printf("\n");
+
+        dataPtr += 16;
+        offset += 16;
+        size -= 16;
+    }
+
+    // Print final line
+    if (!skip_first_column)
+        printf("%08x: ", offset);
+    
+    Hexline(dataPtr, size, skip_first_column, skip_third_column);
+    printf("\n");
+
+    return;
 }
 
 #ifdef _WIN32
@@ -218,7 +279,7 @@ int main(int argc, char **argv)
     printf("[*] Number of bytes read: %d\n", numread);
 #endif
 
-    OutputFormatting(buf, numread, skip_first_column, skip_third_column);
+    Hexdump(buf, numread, skip_first_column, skip_third_column);
 
     printf("\n");
     free(buf);

@@ -1,14 +1,13 @@
-.PHONY: all hexdump debug
+.PHONY: all hexdump
 
-all: hexdump debug
+all: hexdump
 
 hexdump:
 	gcc hexdump.c -o hexdump
 
 debug:
-	gcc -DDEBUG hexdump.c -o hexdump_d
+	gcc -DDEBUG hexdump.c -o hexdump
 
 clean:
 	test -f hexdump && rm hexdump || true
-	test -f hexdump_d && rm hexdump_d || true
 
